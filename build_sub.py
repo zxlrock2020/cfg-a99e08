@@ -9,7 +9,8 @@ import yaml
 SERVER_IP = sys.argv[1] if len(sys.argv) > 1 else '64.204.25.118'  # 换 IP 可传参：python build_sub.py 1.2.3.4
 UUID      = 'c346d926-910c-47ca-977d-f33611e69b48'
 BASE      = f'http://{SERVER_IP}:13315/{UUID}'
-OUT       = os.path.dirname(os.path.abspath(__file__))
+OUT       = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'dist')
+os.makedirs(OUT, exist_ok=True)
 
 def get(path, timeout=20):
     return urllib.request.urlopen(f'{BASE}/{path}', timeout=timeout).read().decode('utf-8', 'ignore')
