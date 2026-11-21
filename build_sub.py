@@ -6,7 +6,7 @@
 import base64, io, json, os, sys, urllib.request
 import yaml
 
-SERVER_IP = '64.204.25.118'
+SERVER_IP = sys.argv[1] if len(sys.argv) > 1 else '64.204.25.118'  # 换 IP 可传参：python build_sub.py 1.2.3.4
 UUID      = 'c346d926-910c-47ca-977d-f33611e69b48'
 BASE      = f'http://{SERVER_IP}:13315/{UUID}'
 OUT       = os.path.dirname(os.path.abspath(__file__))
