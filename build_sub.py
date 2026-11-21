@@ -47,6 +47,30 @@ def build_clash():
             f'# 由 build_sub.py 生成，节点已内联，不依赖服务器上的 proxy-provider\n')
     return head + yaml.safe_dump(cfg, allow_unicode=True, sort_keys=False, width=4096), len(nodes)
 
+
+def _fix_insecure(b64_text):
+    """把小火箭/v2rayN 列表里的自签证书节点改成 insecure=1（去掉 hpkp 严格校验）。
+    原因：服务器是自签证书，Shadowrocket 对 hpkp 支持不好，会显示不出延迟/连不上。"""
+    raw = b64_text.strip()
+    try:
+        dec = base64.b64decode(raw + '=' * (-len(raw) % 4)).decode('utf-8', 'ignore')
+    except Exception:
+        return b64_text
+    out = []
+    for line in dec.splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        scheme = line.split('://')[0].lower()
+        if scheme in ('hysteria2', 'hysteria', 'tuic', 'anytls', 'trojan'):
+            base, sep, frag = line.partition('#')
+            head, _, query = base.partition('?')
+            params = [x for x in query.split('&') if x and not x.startswith(('hpkp=', 'insecure='))]
+            params.append('insecure=1')
+            line = head + '?' + '&'.join(params) + (sep + frag if sep else '')
+        out.append(line)
+    return base64.b64encode('\n'.join(out).encode()).decode()
+
 def write(name, text):
     with open(os.path.join(OUT, name), 'w', encoding='utf-8', newline='\n') as f:
         f.write(text)
@@ -56,8 +80,8 @@ def main():
     print(f'源：{BASE}')
     clash, n = build_clash()
     write('clash.yaml', clash)
-    write('shadowrocket.txt', get('shadowrocket'))   # base64 节点列表
-    write('v2rayn.txt', get('v2rayn'))
+    write('shadowrocket.txt', _fix_insecure(get('shadowrocket')))   # base64 节点列表（自签证书 → insecure=1）
+    write('v2rayn.txt', _fix_insecure(get('v2rayn')))
     write('sing-box.json', get('sing-box'))
     write('proxies.yaml', get('proxies'))
     write('index.html', f"""<!doctype html><meta charset="utf-8">
