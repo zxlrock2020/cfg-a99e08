@@ -1,0 +1,103 @@
+# 自建 VPS 静态订阅（64.204.25.118）
+# 由 build_sub.py 生成，节点已内联，不依赖服务器上的 proxy-provider
+mixed-port: 7890
+allow-lan: false
+mode: rule
+log-level: info
+ipv6: false
+unified-delay: true
+tcp-concurrent: true
+proxies:
+- name: US-xtls-reality
+  type: vless
+  server: 64.204.25.118
+  port: 8881
+  uuid: c346d926-910c-47ca-977d-f33611e69b48
+  network: tcp
+  udp: true
+  tls: true
+  flow: xtls-rprx-vision
+  servername: addons.mozilla.org
+  client-fingerprint: chrome
+  reality-opts:
+    public-key: CwgScqKmlEbfG5kiImqTPfLXPL-dNJynYGYRgg4Lgi0
+    short-id: ''
+  smux:
+    enabled: false
+    protocol: h2mux
+    padding: false
+    max-connections: '8'
+    min-streams: '16'
+    statistic: true
+    only-tcp: false
+  brutal-opts:
+    enabled: false
+    up: 1000 Mbps
+    down: 1000 Mbps
+- name: US-hysteria2
+  type: hysteria2
+  server: 64.204.25.118
+  port: 8882
+  up: 200 Mbps
+  down: 1000 Mbps
+  password: c346d926-910c-47ca-977d-f33611e69b48
+  sni: addons.mozilla.org
+  skip-cert-verify: true
+  fingerprint: E7:2F:D2:0A:3A:DF:37:37:5D:9A:FF:D9:37:1A:44:D9:00:82:F1:27:30:A2:F9:60:05:AF:84:6C:71:F9:73:EB
+- name: US-tuic
+  type: tuic
+  server: 64.204.25.118
+  port: 8883
+  uuid: c346d926-910c-47ca-977d-f33611e69b48
+  password: c346d926-910c-47ca-977d-f33611e69b48
+  alpn:
+  - h3
+  reduce-rtt: true
+  request-timeout: 8000
+  udp-relay-mode: native
+  congestion-controller: bbr
+  sni: addons.mozilla.org
+  skip-cert-verify: true
+  fingerprint: E7:2F:D2:0A:3A:DF:37:37:5D:9A:FF:D9:37:1A:44:D9:00:82:F1:27:30:A2:F9:60:05:AF:84:6C:71:F9:73:EB
+- name: US-anytls
+  type: anytls
+  server: 64.204.25.118
+  port: 8891
+  password: c346d926-910c-47ca-977d-f33611e69b48
+  client-fingerprint: chrome
+  udp: true
+  idle-session-check-interval: 30
+  idle-session-timeout: 30
+  sni: addons.mozilla.org
+  skip-cert-verify: true
+  fingerprint: E7:2F:D2:0A:3A:DF:37:37:5D:9A:FF:D9:37:1A:44:D9:00:82:F1:27:30:A2:F9:60:05:AF:84:6C:71:F9:73:EB
+proxy-groups:
+- name: 🚀 节点选择
+  type: select
+  proxies:
+  - ♻️ 自动选择
+  - US-xtls-reality
+  - US-hysteria2
+  - US-tuic
+  - US-anytls
+  - DIRECT
+- name: ♻️ 自动选择
+  type: url-test
+  url: https://www.gstatic.com/generate_204
+  interval: 300
+  tolerance: 50
+  proxies:
+  - US-xtls-reality
+  - US-hysteria2
+  - US-tuic
+  - US-anytls
+rules:
+- IP-CIDR,64.204.25.118/32,DIRECT,no-resolve
+- DOMAIN-SUFFIX,local,DIRECT
+- IP-CIDR,127.0.0.0/8,DIRECT,no-resolve
+- IP-CIDR,10.0.0.0/8,DIRECT,no-resolve
+- IP-CIDR,172.16.0.0/12,DIRECT,no-resolve
+- IP-CIDR,192.168.0.0/16,DIRECT,no-resolve
+- GEOSITE,cn,DIRECT
+- GEOIP,CN,DIRECT
+- MATCH,🚀 节点选择
